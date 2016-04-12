@@ -19157,11 +19157,21 @@ module.exports = exports['default'];
 },{"./name.jsx":161,"react":158}],160:[function(require,module,exports){
 'use strict';
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var App = require('./app.jsx');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-ReactDOM.render(React.createElement(App, null), document.getElementById('app'));
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _appJsx = require('./app.jsx');
+
+var _appJsx2 = _interopRequireDefault(_appJsx);
+
+_reactDom2['default'].render(_react2['default'].createElement(_appJsx2['default'], null), document.getElementById('app'));
 
 },{"./app.jsx":159,"react":158,"react-dom":2}],161:[function(require,module,exports){
 'use strict';
