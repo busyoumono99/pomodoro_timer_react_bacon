@@ -9,6 +9,8 @@
   "author": "busyoumono99",
   "license": "MIT",
   "dependencies": {
+    "baconjs": "^0.7.84",
+    "lodash": "^4.10.0",
     "react": "^0.14.0",
     "react-dom": "^0.14.0"
   },
