@@ -16,9 +16,11 @@ import CounDownTime from './states/count_down_time.js';
 // Property(combine)
 // Appコンポーネント用のstateプロパティ
 var state = Bacon.combineTemplate({
-  count_down_time: CounDownTime.current_time_ms,
+  count_down_time: CounDownTime.data,
 })
-  .doAction((state) => console.log(state));
+  .doAction((state) => {
+    console.log(state)
+  });
 
 
 export default {
