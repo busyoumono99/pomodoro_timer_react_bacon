@@ -42186,6 +42186,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _libConstJs = require('../lib/const.js');
+
+var _libConstJs2 = _interopRequireDefault(_libConstJs);
+
 var _statesCount_down_timeJs = require('../states/count_down_time.js');
 
 var _statesCount_down_timeJs2 = _interopRequireDefault(_statesCount_down_timeJs);
@@ -42202,7 +42206,22 @@ var App = (function (_React$Component) {
   _createClass(App, [{
     key: 'onClickStartBtn',
     value: function onClickStartBtn() {
-      _statesCount_down_timeJs2['default'].start();
+      _statesCount_down_timeJs2['default'].start(_libConstJs2['default'].POMODORO_DURATION);
+    }
+  }, {
+    key: 'onClickSuspendBtn',
+    value: function onClickSuspendBtn() {
+      _statesCount_down_timeJs2['default'].suspend();
+    }
+  }, {
+    key: 'onClickResumeBtn',
+    value: function onClickResumeBtn() {
+      _statesCount_down_timeJs2['default'].resume();
+    }
+  }, {
+    key: 'onClickResetBtn',
+    value: function onClickResetBtn() {
+      _statesCount_down_timeJs2['default'].reset(_libConstJs2['default'].POMODORO_DURATION);
     }
   }, {
     key: 'render',
@@ -42218,12 +42237,27 @@ var App = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           null,
-          this.props.count_down_time
+          this.props.count_down_time.time
         ),
         _react2['default'].createElement('input', {
           type: 'button',
           value: 'start',
           onClick: this.onClickStartBtn.bind(this)
+        }),
+        _react2['default'].createElement('input', {
+          type: 'button',
+          value: 'suspend',
+          onClick: this.onClickSuspendBtn.bind(this)
+        }),
+        _react2['default'].createElement('input', {
+          type: 'button',
+          value: 'resume',
+          onClick: this.onClickResumeBtn.bind(this)
+        }),
+        _react2['default'].createElement('input', {
+          type: 'button',
+          value: 'reset',
+          onClick: this.onClickResetBtn.bind(this)
         })
       );
     }
@@ -42236,7 +42270,7 @@ exports['default'] = App;
 ;
 module.exports = exports['default'];
 
-},{"../states/count_down_time.js":166,"react":161}],163:[function(require,module,exports){
+},{"../lib/const.js":163,"../states/count_down_time.js":166,"react":161}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42368,11 +42402,28 @@ var d = new _libDispatcherJs2['default']();
  * 現在の時間(ms)。キックされた後に減っていく。
  * @var  {int}
  */
-var current_time_ms = d.stream('current_time_ms').toProperty(_libConstJs2['default'].POMODORO_DURATION);
+var time = d.stream('time').toProperty(_libConstJs2['default'].POMODORO_DURATION);
+
+/**
+ * 一時停止フラグ
+ * @var  {bool}
+ */
+var is_suspend = d.stream('is_suspend').toProperty(false);
+
+/**
+ * リセットプロパティ
+ * @var  {bool}
+ */
+var is_reset = d.stream('is_reset').toProperty(false);
 
 // ***************************
 // Property(combine)
 // TODO:ms表示から時刻表示に変更
+var data = _baconjs2['default'].combineTemplate({
+  time: time,
+  is_suspend: is_suspend,
+  is_reset: is_reset
+});
 
 // ********************
 // Logic
@@ -42381,25 +42432,42 @@ var current_time_ms = d.stream('current_time_ms').toProperty(_libConstJs2['defau
  * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
  * @return {void}
  */
-var start = function start() {
+var _start = function _start(current_duration) {
   // 1秒毎にカウントダウンする
   var interval = 1000;
 
-  // ストリームの作成
+  // ループストリームの作成
   var poll = _baconjs2['default'].fromPoll(interval, function () {
     return interval;
-  }).scan(_libConstJs2['default'].POMODORO_DURATION, function (prev, _interval) {
-    return prev - _interval;
+  });
+  // ストリーム、プロパティの合成
+  var combine = _baconjs2['default'].combineTemplate({
+    interval: poll,
+    is_suspend: is_suspend,
+    is_reset: is_reset
+  }).doAction(function (val) {
+    return console.log(val);
+  }).takeWhile(function (val) {
+    return !val.is_reset;
+  }).filter(function (val) {
+    return !val.is_suspend;
+  }).doAction(function (val) {
+    return console.log(val);
+  }).scan(current_duration, function (prev, val) {
+    return prev - val.interval;
   }).doAction(function (time) {
-    return d.push('current_time_ms', time);
+    return d.push('time', time);
   }).takeWhile(function (time) {
     return time > 0;
   });
 
   // ストリームの端点の設定
-  poll.onValue();
-  poll.onEnd(function () {
-    return d.push('current_time_ms', _libConstJs2['default'].POMODORO_DURATION);
+  combine.onValue();
+  combine.onEnd(function () {
+    // 終了するので初期化処理
+    d.push('time', 0);
+    d.push('is_suspend', false);
+    d.push('is_reset', false);
   });
 };
 
@@ -42408,11 +42476,27 @@ var start = function start() {
 exports['default'] = {
   // ***************************
   // Property
-  current_time_ms: current_time_ms,
+  data: data,
 
   // ***************************
   // function
-  start: start
+  start: function start(current_duration) {
+    d.push('is_reset', false);
+    _start(current_duration);
+  },
+
+  suspend: function suspend() {
+    d.push('is_suspend', true);
+  },
+
+  resume: function resume() {
+    d.push('is_suspend', false);
+  },
+
+  reset: function reset(next_duration) {
+    d.push('is_reset', true);
+    d.push('time', next_duration);
+  }
 };
 module.exports = exports['default'];
 
@@ -42447,9 +42531,9 @@ var _statesCount_down_timeJs2 = _interopRequireDefault(_statesCount_down_timeJs)
 // Property(combine)
 // Appコンポーネント用のstateプロパティ
 var state = _baconjs2['default'].combineTemplate({
-  count_down_time: _statesCount_down_timeJs2['default'].current_time_ms
+  count_down_time: _statesCount_down_timeJs2['default'].data
 }).doAction(function (state) {
-  return console.log(state);
+  console.log(state);
 });
 
 exports['default'] = {
