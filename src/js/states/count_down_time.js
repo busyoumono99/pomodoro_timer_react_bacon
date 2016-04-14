@@ -32,8 +32,12 @@ let is_reset = d.stream('is_reset')
 
 // ***************************
 // Property(combine)
-// TODO:ms表示から時刻表示に変更
+let format_time = Bacon.combineAsArray(time)
+  .doAction((val)=>console.log(val))
+  .map((val) => moment(val[0]).format("mm:ss"));
+
 let data = Bacon.combineTemplate({
+    format_time,
     time,
     is_suspend,
     is_reset,
@@ -46,7 +50,7 @@ let data = Bacon.combineTemplate({
  * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
  * @return {void}
  */
-let _start = (current_duration) => {
+let _start = () => {
   // 1秒毎にカウントダウンする
   let interval = 1000;
 
@@ -62,7 +66,7 @@ let _start = (current_duration) => {
     .takeWhile((val)=>!val.is_reset)
     .filter((val)=>!val.is_suspend)
     .doAction((val)=>console.log(val))
-    .scan(current_duration, (prev, val) => prev - val.interval)
+    .scan(Const.POMODORO_DURATION, (prev, val) => prev - val.interval)
     .doAction((time) => d.push('time', time) )
     .takeWhile((time)=> time > 0);
 
@@ -70,7 +74,7 @@ let _start = (current_duration) => {
     combine.onValue();
     combine.onEnd(() => {
       // 終了するので初期化処理
-      d.push('time', 0);
+      d.push('time', Const.POMODORO_DURATION);
       d.push('is_suspend', false);
       d.push('is_reset', false);
     });
@@ -86,9 +90,9 @@ export default {
 
   // ***************************
   // function
-  start:(current_duration) => {
+  start:() => {
     d.push('is_reset', false);
-    _start(current_duration);
+    _start();
   },
 
   suspend: () => {
@@ -99,8 +103,7 @@ export default {
     d.push('is_suspend', false);
   },
 
-  reset: (next_duration) => {
+  reset: () => {
     d.push('is_reset', true);
-    d.push('time', next_duration);
   },
 };
