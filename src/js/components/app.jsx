@@ -1,27 +1,27 @@
 import React from 'react';
 
-import CountDownTime from '../states/count_down_time.js';
+import Timer from '../states/timer.js';
 
 export default class App extends React.Component{
 
   onClickStartBtn() {
-    CountDownTime.start();
+    Timer.start();
   }
   onClickSuspendBtn() {
-    CountDownTime.suspend();
+    Timer.suspend();
   }
   onClickResumeBtn() {
-    CountDownTime.resume();
+    Timer.resume();
   }
   onClickResetBtn() {
-    CountDownTime.reset();
+    Timer.reset();
   }
 
   render() {
     return (
       <div>
         <h1>Pomodoro Timer</h1>
-        <div>{this.props.count_down_time.format_time}</div>
+        <div>{this.props.timer.format_time}</div>
         <input
           type="button"
           value="start"

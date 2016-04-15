@@ -1,7 +1,7 @@
 import Bacon  from 'baconjs';
 import _      from 'lodash';
 
-import CounDownTime from './states/count_down_time.js';
+import CounDownTime from './states/timer.js';
 
 
 // ********************
@@ -16,7 +16,7 @@ import CounDownTime from './states/count_down_time.js';
 // Property(combine)
 // Appコンポーネント用のstateプロパティ
 var state = Bacon.combineTemplate({
-  count_down_time: CounDownTime.data,
+  timer: CounDownTime.data,
 })
   .doAction((state) => {
     console.log(state)
