@@ -42186,9 +42186,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _statesCount_down_timeJs = require('../states/count_down_time.js');
+var _statesTimerJs = require('../states/timer.js');
 
-var _statesCount_down_timeJs2 = _interopRequireDefault(_statesCount_down_timeJs);
+var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
 
 var App = (function (_React$Component) {
   _inherits(App, _React$Component);
@@ -42202,22 +42202,22 @@ var App = (function (_React$Component) {
   _createClass(App, [{
     key: 'onClickStartBtn',
     value: function onClickStartBtn() {
-      _statesCount_down_timeJs2['default'].start();
+      _statesTimerJs2['default'].start();
     }
   }, {
     key: 'onClickSuspendBtn',
     value: function onClickSuspendBtn() {
-      _statesCount_down_timeJs2['default'].suspend();
+      _statesTimerJs2['default'].suspend();
     }
   }, {
     key: 'onClickResumeBtn',
     value: function onClickResumeBtn() {
-      _statesCount_down_timeJs2['default'].resume();
+      _statesTimerJs2['default'].resume();
     }
   }, {
     key: 'onClickResetBtn',
     value: function onClickResetBtn() {
-      _statesCount_down_timeJs2['default'].reset();
+      _statesTimerJs2['default'].reset();
     }
   }, {
     key: 'render',
@@ -42233,7 +42233,7 @@ var App = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           null,
-          this.props.count_down_time.format_time
+          this.props.timer.format_time
         ),
         _react2['default'].createElement('input', {
           type: 'button',
@@ -42266,7 +42266,7 @@ exports['default'] = App;
 ;
 module.exports = exports['default'];
 
-},{"../states/count_down_time.js":166,"react":161}],163:[function(require,module,exports){
+},{"../states/timer.js":166,"react":161}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42518,9 +42518,9 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _statesCount_down_timeJs = require('./states/count_down_time.js');
+var _statesTimerJs = require('./states/timer.js');
 
-var _statesCount_down_timeJs2 = _interopRequireDefault(_statesCount_down_timeJs);
+var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
 
 // ********************
 // Logic
@@ -42532,7 +42532,7 @@ var _statesCount_down_timeJs2 = _interopRequireDefault(_statesCount_down_timeJs)
 // Property(combine)
 // Appコンポーネント用のstateプロパティ
 var state = _baconjs2['default'].combineTemplate({
-  count_down_time: _statesCount_down_timeJs2['default'].data
+  timer: _statesTimerJs2['default'].data
 }).doAction(function (state) {
   console.log(state);
 });
@@ -42548,7 +42548,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./states/count_down_time.js":166,"baconjs":1,"lodash":3}]},{},[165])
+},{"./states/timer.js":166,"baconjs":1,"lodash":3}]},{},[165])
 
 
 //# sourceMappingURL=main.js.map
