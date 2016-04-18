@@ -1,20 +1,17 @@
-import Bacon      from 'baconjs';
-import _          from 'lodash';
-import moment     from 'moment';
+import Bacon        from 'baconjs';
+import _            from 'lodash';
+import moment       from 'moment';
 
-import Dispatcher from '../lib/dispatcher.js';
-import Const      from '../lib/const.js';
+import Dispatcher   from '../lib/dispatcher.js';
+import Const        from '../lib/const.js';
 
 import ControlFlgs  from './control_flgs.js';
-import Timer from './timer.js';
+import Timer        from './timer.js';
 
 const d = new Dispatcher();
 
 // ********************
 // Property
-
-
-
 
 
 let init = (initialValue) => {
@@ -26,11 +23,6 @@ let init = (initialValue) => {
 
   let nextSequence = (items) => {
     let newSequence = _.tail(items);
-    Timer.start(newSequence[0], ()=>{
-      if (newSequence.length >0) {
-        d.push('next');
-      }
-    });
     return newSequence;
   };
 
@@ -39,79 +31,73 @@ let init = (initialValue) => {
     return [];
   };
 
-  let startSequence = (items) => {
-    Timer.start(items[0], ()=>{
-      d.push('next');
-    });
-    return items;
-  }
-
-
-
   // カレント配列、ストリーム、配列を返す関数の組み合わせ
   const sequenceS = Bacon.update(initialValue,
     [d.stream('replace')],          replaceSequence,
     [d.stream('next')],             nextSequence,
     [d.stream('clear')],            clearSequence,
-    [d.stream('start')],            startSequence,
   )
   return sequenceS;
-  // return Bacon.combineAsArray([sequenceS, flgsP]).map(withDisplayStatus)
 };
 
-// 初期化を実行する
-// init([]);
-
-
-
-
-
-
-
-
 /**
- * 現在の時間(ms)。キックされた後に減っていく。
+ * 次のindex。
  * @var  {int}
  */
-let current_duration = d.stream('current_duration')
-  .toProperty(0);
+let next_index = d.stream('next_index')
+  .scan(0, (seed, val)=>{
+    if (val > 0) {
+      return seed + val;
+    }
+    return 0;
+  });
 
-/**
- * 現在の時間(ms)。キックされた後に減っていく。
- * @var  {int}
- */
-// let sequence = d.stream('sequence')
-//   .toProperty([]);
-
-/**
- * 一時停止フラグ
- * @var  {bool}
- */
-// let current_index = d.stream('current_index')
-//   .toProperty(0);
-//
-// let next = d.stream('next');
 
 // ***************************
 // Property(combine)
-// let next_value = next
-//   .combine(sequence,(val1, val2)=>{
-//     console.log(val1);
-//     console.log(val2);
-//     return 'hoge';
-//   });
+Bacon.combineTemplate({
+  next_index,
+  sequence: init([]),
+  flgs:   ControlFlgs.data,
+})
+  // next_indexが同じ場合は停止。sequenceかflgsの更新で次に進むと無限ループに入る
+  .skipDuplicates((_old, _new) => _old.next_index === _new.next_index)
+  // .doAction((val)=>console.log(val))
+  // next_indexが0以外は次へ
+  .filter((val)=>val.next_index !== 0)
+  .flatMap((val)=>{
+    // sequenceが0なら終了処理へ
+    if(val.sequence.length === 0){
+      return new Bacon.Error();
+    }
+    // リセットフラグが立っていれば終了処理へ
+    if (val.flgs.is_reset) {
+      return new Bacon.Error();
+    }
+    return val;
+  })
+  // .doAction((val) => console.log(val))
+  // sequenceを進める
+  .doAction((val)=>d.push('next'))
+  // タイマーの設定。タイマー終了時のコールバックでsequenceを進める
+  .map((val)=>{
+    Timer.start(val.sequence[0],()=>{
+      d.push('next_index', 1);
+    })
+  })
+  // 終了処理
+  .mapError(()=>{
+    d.push('replace', []);
+    d.push('next_index', 0);
+    ControlFlgs.init();
+  })
+  .onValue();
 
-// let data = Bacon.combineTemplate({
-//   sequence,
-//   current_index,
-//   // next_value,
-// });
 
 // ********************
 // Logic
 /**
- * カウントダウンの開始。
- * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
+ * キューのシーケンスを作る。ポモドーロ、休憩、ポモドーロ、休憩...を繰り返すようにする
  * @return {void}
  */
 let createSequence = () => {
@@ -129,7 +115,7 @@ let createSequence = () => {
 }
 
 let start = () => {
-  d.push('start', null);
+  d.push('next_index', 1);
 }
 
 
@@ -138,17 +124,16 @@ let start = () => {
 export default {
   // ***************************
   // Property
-  // data,
   init,
-  start,
 
   // ***************************
   // function
   createSequence,
-  next: ()=>{
-    d.push('next', null);
-  },
-
-  // start: ()=>{
-  // }
+  // next: ()=>{
+  //   d.push('next', null);
+  // },
+  // シーケンスの開始
+  start: () => {
+    d.push('next_index', 1);
+  }
 };

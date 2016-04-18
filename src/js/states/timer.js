@@ -75,7 +75,7 @@ let _start = (duration, callback) => {
       d.push('time', 0);
       // d.push('is_suspend', false);
       // d.push('is_reset', false);
-      ControlFlgs.init();
+      // ControlFlgs.init();
       callback();
     });
 }
@@ -91,20 +91,6 @@ export default {
   // ***************************
   // function
   start:(duration, callback) => {
-    // d.push('is_reset', false);
-    ControlFlgs.clear_reset();
     _start(duration, callback);
   },
-
-  // suspend: () => {
-  //   d.push('is_suspend', true);
-  // },
-  //
-  // resume: () => {
-  //   d.push('is_suspend', false);
-  // },
-  //
-  // reset: () => {
-  //   d.push('is_reset', true);
-  // },
 };

@@ -42554,11 +42554,6 @@ var init = function init(initialValue) {
 
   var nextSequence = function nextSequence(items) {
     var newSequence = _lodash2['default'].tail(items);
-    _timerJs2['default'].start(newSequence[0], function () {
-      if (newSequence.length > 0) {
-        d.push('next');
-      }
-    });
     return newSequence;
   };
 
@@ -42567,64 +42562,70 @@ var init = function init(initialValue) {
     return [];
   };
 
-  var startSequence = function startSequence(items) {
-    _timerJs2['default'].start(items[0], function () {
-      d.push('next');
-    });
-    return items;
-  };
-
   // カレント配列、ストリーム、配列を返す関数の組み合わせ
-  var sequenceS = _baconjs2['default'].update(initialValue, [d.stream('replace')], replaceSequence, [d.stream('next')], nextSequence, [d.stream('clear')], clearSequence, [d.stream('start')], startSequence);
+  var sequenceS = _baconjs2['default'].update(initialValue, [d.stream('replace')], replaceSequence, [d.stream('next')], nextSequence, [d.stream('clear')], clearSequence);
   return sequenceS;
-  // return Bacon.combineAsArray([sequenceS, flgsP]).map(withDisplayStatus)
 };
 
-// 初期化を実行する
-// init([]);
-
 /**
- * 現在の時間(ms)。キックされた後に減っていく。
+ * 次のindex。
  * @var  {int}
  */
-var current_duration = d.stream('current_duration').toProperty(0);
-
-/**
- * 現在の時間(ms)。キックされた後に減っていく。
- * @var  {int}
- */
-// let sequence = d.stream('sequence')
-//   .toProperty([]);
-
-/**
- * 一時停止フラグ
- * @var  {bool}
- */
-// let current_index = d.stream('current_index')
-//   .toProperty(0);
-//
-// let next = d.stream('next');
+var next_index = d.stream('next_index').scan(0, function (seed, val) {
+  if (val > 0) {
+    return seed + val;
+  }
+  return 0;
+});
 
 // ***************************
 // Property(combine)
-// let next_value = next
-//   .combine(sequence,(val1, val2)=>{
-//     console.log(val1);
-//     console.log(val2);
-//     return 'hoge';
-//   });
-
-// let data = Bacon.combineTemplate({
-//   sequence,
-//   current_index,
-//   // next_value,
-// });
+_baconjs2['default'].combineTemplate({
+  next_index: next_index,
+  sequence: init([]),
+  flgs: _control_flgsJs2['default'].data
+})
+// next_indexが同じ場合は停止。sequenceかflgsの更新で次に進むと無限ループに入る
+.skipDuplicates(function (_old, _new) {
+  return _old.next_index === _new.next_index;
+})
+// .doAction((val)=>console.log(val))
+// next_indexが0以外は次へ
+.filter(function (val) {
+  return val.next_index !== 0;
+}).flatMap(function (val) {
+  // sequenceが0なら終了処理へ
+  if (val.sequence.length === 0) {
+    return new _baconjs2['default'].Error();
+  }
+  // リセットフラグが立っていれば終了処理へ
+  if (val.flgs.is_reset) {
+    return new _baconjs2['default'].Error();
+  }
+  return val;
+})
+// .doAction((val) => console.log(val))
+// sequenceを進める
+.doAction(function (val) {
+  return d.push('next');
+})
+// タイマーの設定。タイマー終了時のコールバックでsequenceを進める
+.map(function (val) {
+  _timerJs2['default'].start(val.sequence[0], function () {
+    d.push('next_index', 1);
+  });
+})
+// 終了処理
+.mapError(function () {
+  d.push('replace', []);
+  d.push('next_index', 0);
+  _control_flgsJs2['default'].init();
+}).onValue();
 
 // ********************
 // Logic
 /**
- * カウントダウンの開始。
- * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
+ * キューのシーケンスを作る。ポモドーロ、休憩、ポモドーロ、休憩...を繰り返すようにする
  * @return {void}
  */
 var createSequence = function createSequence() {
@@ -42642,7 +42643,7 @@ var createSequence = function createSequence() {
 };
 
 var start = function start() {
-  d.push('start', null);
+  d.push('next_index', 1);
 };
 
 // ********************
@@ -42650,21 +42651,20 @@ var start = function start() {
 exports['default'] = {
   // ***************************
   // Property
-  // data,
   init: init,
-  start: start,
 
   // ***************************
   // function
   createSequence: createSequence,
-  next: function next() {
-    d.push('next', null);
+  // next: ()=>{
+  //   d.push('next', null);
+  // },
+  // シーケンスの開始
+  start: function start() {
+    d.push('next_index', 1);
   }
-
 };
 module.exports = exports['default'];
-// start: ()=>{
-// }
 
 },{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"./timer.js":168,"baconjs":1,"lodash":3,"moment":4}],168:[function(require,module,exports){
 'use strict';
@@ -42773,7 +42773,7 @@ var _start = function _start(duration, callback) {
     d.push('time', 0);
     // d.push('is_suspend', false);
     // d.push('is_reset', false);
-    _control_flgsJs2['default'].init();
+    // ControlFlgs.init();
     callback();
   });
 };
@@ -42788,24 +42788,10 @@ exports['default'] = {
   // ***************************
   // function
   start: function start(duration, callback) {
-    // d.push('is_reset', false);
-    _control_flgsJs2['default'].clear_reset();
     _start(duration, callback);
   }
-
 };
 module.exports = exports['default'];
-// suspend: () => {
-//   d.push('is_suspend', true);
-// },
-//
-// resume: () => {
-//   d.push('is_suspend', false);
-// },
-//
-// reset: () => {
-//   d.push('is_reset', true);
-// },
 
 },{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"baconjs":1,"lodash":3,"moment":4}],169:[function(require,module,exports){
 'use strict';
