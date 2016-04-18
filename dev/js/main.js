@@ -42186,9 +42186,17 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _statesControl_flgsJs = require('../states/control_flgs.js');
+
+var _statesControl_flgsJs2 = _interopRequireDefault(_statesControl_flgsJs);
+
 var _statesTimerJs = require('../states/timer.js');
 
 var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
+
+var _statesSequenceJs = require('../states/sequence.js');
+
+var _statesSequenceJs2 = _interopRequireDefault(_statesSequenceJs);
 
 var App = (function (_React$Component) {
   _inherits(App, _React$Component);
@@ -42207,17 +42215,32 @@ var App = (function (_React$Component) {
   }, {
     key: 'onClickSuspendBtn',
     value: function onClickSuspendBtn() {
-      _statesTimerJs2['default'].suspend();
+      _statesControl_flgsJs2['default'].suspend();
     }
   }, {
     key: 'onClickResumeBtn',
     value: function onClickResumeBtn() {
-      _statesTimerJs2['default'].resume();
+      _statesControl_flgsJs2['default'].resume();
     }
   }, {
     key: 'onClickResetBtn',
     value: function onClickResetBtn() {
-      _statesTimerJs2['default'].reset();
+      _statesControl_flgsJs2['default'].reset();
+    }
+  }, {
+    key: 'onClickCreateSeqBtn',
+    value: function onClickCreateSeqBtn() {
+      _statesSequenceJs2['default'].createSequence();
+    }
+  }, {
+    key: 'onClickStartSeqBtn',
+    value: function onClickStartSeqBtn() {
+      _statesSequenceJs2['default'].start();
+    }
+  }, {
+    key: 'onClickNextSeqBtn',
+    value: function onClickNextSeqBtn() {
+      _statesSequenceJs2['default'].next();
     }
   }, {
     key: 'render',
@@ -42235,26 +42258,49 @@ var App = (function (_React$Component) {
           null,
           this.props.timer.format_time
         ),
-        _react2['default'].createElement('input', {
-          type: 'button',
-          value: 'start',
-          onClick: this.onClickStartBtn.bind(this)
-        }),
-        _react2['default'].createElement('input', {
-          type: 'button',
-          value: 'suspend',
-          onClick: this.onClickSuspendBtn.bind(this)
-        }),
-        _react2['default'].createElement('input', {
-          type: 'button',
-          value: 'resume',
-          onClick: this.onClickResumeBtn.bind(this)
-        }),
-        _react2['default'].createElement('input', {
-          type: 'button',
-          value: 'reset',
-          onClick: this.onClickResetBtn.bind(this)
-        })
+        _react2['default'].createElement(
+          'div',
+          null,
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'start',
+            onClick: this.onClickStartBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'suspend',
+            onClick: this.onClickSuspendBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'resume',
+            onClick: this.onClickResumeBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'reset',
+            onClick: this.onClickResetBtn.bind(this)
+          })
+        ),
+        _react2['default'].createElement(
+          'div',
+          null,
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'create_sequence',
+            onClick: this.onClickCreateSeqBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'start_sequence',
+            onClick: this.onClickStartSeqBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'next_sequence',
+            onClick: this.onClickNextSeqBtn.bind(this)
+          })
+        )
       );
     }
   }]);
@@ -42266,7 +42312,7 @@ exports['default'] = App;
 ;
 module.exports = exports['default'];
 
-},{"../states/timer.js":166,"react":161}],163:[function(require,module,exports){
+},{"../states/control_flgs.js":166,"../states/sequence.js":167,"../states/timer.js":168,"react":161}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42276,7 +42322,15 @@ exports["default"] = {
   // ***************************
   //  ポモドーロ時間(ms)
   // POMODORO_DURATION: 25 * 60 * 1000,
-  POMODORO_DURATION: 0.1 * 60 * 1000
+  POMODORO_DURATION: 0.1 * 60 * 1000,
+
+  // SHORT_BREAK: 5 * 60 * 1000,
+  SHORT_BREAK: 2 * 1000,
+  // LONG_BREAK: 15 * 60 * 1000,
+  LONG_BREAK: 4 * 1000,
+
+  // LONG_BREAK_AFTER:4,
+  LONG_BREAK_AFTER: 2
 
 };
 module.exports = exports["default"];
@@ -42361,7 +42415,7 @@ _storeJs2['default'].state.onValue(function (state) {
   _reactDom2['default'].render(_react2['default'].createElement(_componentsAppJsx2['default'], state), document.getElementById('app'));
 });
 
-},{"./components/app.jsx":162,"./store.js":167,"react":161,"react-dom":5}],166:[function(require,module,exports){
+},{"./components/app.jsx":162,"./store.js":169,"react":161,"react-dom":5}],166:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -42395,12 +42449,6 @@ var d = new _libDispatcherJs2['default']();
 // ********************
 // Property
 /**
- * 現在の時間(ms)。キックされた後に減っていく。
- * @var  {int}
- */
-var time = d.stream('time').toProperty(_libConstJs2['default'].POMODORO_DURATION);
-
-/**
  * 一時停止フラグ
  * @var  {bool}
  */
@@ -42414,64 +42462,14 @@ var is_reset = d.stream('is_reset').toProperty(false);
 
 // ***************************
 // Property(combine)
-var format_time = _baconjs2['default'].combineAsArray(time).doAction(function (val) {
-  return console.log(val);
-}).map(function (val) {
-  return (0, _moment2['default'])(val[0]).format("mm:ss");
-});
 
 var data = _baconjs2['default'].combineTemplate({
-  format_time: format_time,
-  time: time,
   is_suspend: is_suspend,
   is_reset: is_reset
 });
 
 // ********************
 // Logic
-/**
- * カウントダウンの開始。
- * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
- * @return {void}
- */
-var _start = function _start() {
-  // 1秒毎にカウントダウンする
-  var interval = 1000;
-
-  // ループストリームの作成
-  var poll = _baconjs2['default'].fromPoll(interval, function () {
-    return interval;
-  });
-  // ストリーム、プロパティの合成
-  var combine = _baconjs2['default'].combineTemplate({
-    interval: poll,
-    is_suspend: is_suspend,
-    is_reset: is_reset
-  }).doAction(function (val) {
-    return console.log(val);
-  }).takeWhile(function (val) {
-    return !val.is_reset;
-  }).filter(function (val) {
-    return !val.is_suspend;
-  }).doAction(function (val) {
-    return console.log(val);
-  }).scan(_libConstJs2['default'].POMODORO_DURATION, function (prev, val) {
-    return prev - val.interval;
-  }).doAction(function (time) {
-    return d.push('time', time);
-  }).takeWhile(function (time) {
-    return time > 0;
-  });
-
-  // ストリームの端点の設定
-  combine.onValue();
-  combine.onEnd(function () {
-    // 終了するので初期化処理
-    d.push('time', _libConstJs2['default'].POMODORO_DURATION);
-    d.push('is_suspend', false);
-    d.push('is_reset', false);
-  });
-};
 
 // ********************
 // public
@@ -42482,11 +42480,6 @@ exports['default'] = {
 
   // ***************************
   // function
-  start: function start() {
-    d.push('is_reset', false);
-    _start();
-  },
-
   suspend: function suspend() {
     d.push('is_suspend', true);
   },
@@ -42497,6 +42490,15 @@ exports['default'] = {
 
   reset: function reset() {
     d.push('is_reset', true);
+  },
+
+  clear_reset: function clear_reset() {
+    d.push('is_reset', false);
+  },
+
+  init: function init() {
+    d.push('is_reset', false);
+    d.push('is_suspend', false);
   }
 };
 module.exports = exports['default'];
@@ -42518,9 +42520,321 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var _libDispatcherJs = require('../lib/dispatcher.js');
+
+var _libDispatcherJs2 = _interopRequireDefault(_libDispatcherJs);
+
+var _libConstJs = require('../lib/const.js');
+
+var _libConstJs2 = _interopRequireDefault(_libConstJs);
+
+var _control_flgsJs = require('./control_flgs.js');
+
+var _control_flgsJs2 = _interopRequireDefault(_control_flgsJs);
+
+var _timerJs = require('./timer.js');
+
+var _timerJs2 = _interopRequireDefault(_timerJs);
+
+var d = new _libDispatcherJs2['default']();
+
+// ********************
+// Property
+
+var init = function init(initialValue) {
+  var flgs = {};
+
+  var replaceSequence = function replaceSequence(items, newSequence) {
+    return newSequence;
+  };
+
+  var nextSequence = function nextSequence(items) {
+    var newSequence = _lodash2['default'].tail(items);
+    _timerJs2['default'].start(newSequence[0], function () {
+      if (newSequence.length > 0) {
+        d.push('next');
+      }
+    });
+    return newSequence;
+  };
+
+  var clearSequence = function clearSequence() {
+    d.push('current_duration', 0);
+    return [];
+  };
+
+  var startSequence = function startSequence(items) {
+    _timerJs2['default'].start(items[0], function () {
+      d.push('next');
+    });
+    return items;
+  };
+
+  // カレント配列、ストリーム、配列を返す関数の組み合わせ
+  var sequenceS = _baconjs2['default'].update(initialValue, [d.stream('replace')], replaceSequence, [d.stream('next')], nextSequence, [d.stream('clear')], clearSequence, [d.stream('start')], startSequence);
+  return sequenceS;
+  // return Bacon.combineAsArray([sequenceS, flgsP]).map(withDisplayStatus)
+};
+
+// 初期化を実行する
+// init([]);
+
+/**
+ * 現在の時間(ms)。キックされた後に減っていく。
+ * @var  {int}
+ */
+var current_duration = d.stream('current_duration').toProperty(0);
+
+/**
+ * 現在の時間(ms)。キックされた後に減っていく。
+ * @var  {int}
+ */
+// let sequence = d.stream('sequence')
+//   .toProperty([]);
+
+/**
+ * 一時停止フラグ
+ * @var  {bool}
+ */
+// let current_index = d.stream('current_index')
+//   .toProperty(0);
+//
+// let next = d.stream('next');
+
+// ***************************
+// Property(combine)
+// let next_value = next
+//   .combine(sequence,(val1, val2)=>{
+//     console.log(val1);
+//     console.log(val2);
+//     return 'hoge';
+//   });
+
+// let data = Bacon.combineTemplate({
+//   sequence,
+//   current_index,
+//   // next_value,
+// });
+
+// ********************
+// Logic
+/**
+ * カウントダウンの開始。
+ * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
+ * @return {void}
+ */
+var createSequence = function createSequence() {
+  var pomodoros = _lodash2['default'].fill(Array(_libConstJs2['default'].LONG_BREAK_AFTER), _libConstJs2['default'].POMODORO_DURATION);
+  var breaks = _lodash2['default'].fill(Array(_libConstJs2['default'].LONG_BREAK_AFTER - 1), _libConstJs2['default'].SHORT_BREAK);
+  breaks.push(_libConstJs2['default'].LONG_BREAK);
+
+  var merged = _lodash2['default'].reduce(pomodoros, function (result, value, key) {
+    result.push(value);
+    result.push(breaks[key]);
+    return result;
+  }, []);
+  // console.log(merged);
+  d.push('replace', merged);
+};
+
+var start = function start() {
+  d.push('start', null);
+};
+
+// ********************
+// public
+exports['default'] = {
+  // ***************************
+  // Property
+  // data,
+  init: init,
+  start: start,
+
+  // ***************************
+  // function
+  createSequence: createSequence,
+  next: function next() {
+    d.push('next', null);
+  }
+
+};
+module.exports = exports['default'];
+// start: ()=>{
+// }
+
+},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"./timer.js":168,"baconjs":1,"lodash":3,"moment":4}],168:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _baconjs = require('baconjs');
+
+var _baconjs2 = _interopRequireDefault(_baconjs);
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
+var _libDispatcherJs = require('../lib/dispatcher.js');
+
+var _libDispatcherJs2 = _interopRequireDefault(_libDispatcherJs);
+
+var _libConstJs = require('../lib/const.js');
+
+var _libConstJs2 = _interopRequireDefault(_libConstJs);
+
+var _control_flgsJs = require('./control_flgs.js');
+
+var _control_flgsJs2 = _interopRequireDefault(_control_flgsJs);
+
+var d = new _libDispatcherJs2['default']();
+
+// ********************
+// Property
+/**
+ * 現在の時間(ms)。キックされた後に減っていく。
+ * @var  {int}
+ */
+var time = d.stream('time').toProperty(_libConstJs2['default'].POMODORO_DURATION);
+
+// ***************************
+// Property(combine)
+var format_time = _baconjs2['default'].combineAsArray(time).map(function (val) {
+  return val[0];
+}).map(function (val) {
+  if (_lodash2['default'].isUndefined(val)) {
+    return 0;
+  }
+  return val;
+}).map(function (val) {
+  return (0, _moment2['default'])(val).format("mm:ss");
+});
+
+var data = _baconjs2['default'].combineTemplate({
+  format_time: format_time,
+  time: time
+});
+
+// ********************
+// Logic
+/**
+ * カウントダウンの開始。
+ * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
+ * @return {void}
+ */
+var _start = function _start(duration, callback) {
+  // 1秒毎にカウントダウンする
+  var interval = 1000;
+
+  // ループストリームの作成
+  var poll = _baconjs2['default'].fromPoll(interval, function () {
+    return interval;
+  });
+  // ストリーム、プロパティの合成
+  var combine = _baconjs2['default'].combineTemplate({
+    interval: poll,
+    flgs: _control_flgsJs2['default'].data
+  }).doAction(function (val) {
+    // console.log(ControlFlgs);
+    // console.log(ControlFlgs.data);
+    // console.log(ControlFlgs.data.is_suspend);
+    console.log(val);
+  }).takeWhile(function (val) {
+    return !val.flgs.is_reset;
+  }).filter(function (val) {
+    return !val.flgs.is_suspend;
+  })
+  // .doAction((val)=>console.log(val))
+  .scan(duration, function (prev, val) {
+    return prev - val.interval;
+  }).doAction(function (time) {
+    return d.push('time', time);
+  }).takeWhile(function (time) {
+    return time > 0;
+  });
+
+  // ストリームの端点の設定
+  combine.onValue();
+  combine.onEnd(function (val) {
+    console.log(val);
+    // 終了するので初期化処理
+    d.push('time', 0);
+    // d.push('is_suspend', false);
+    // d.push('is_reset', false);
+    _control_flgsJs2['default'].init();
+    callback();
+  });
+};
+
+// ********************
+// public
+exports['default'] = {
+  // ***************************
+  // Property
+  data: data,
+
+  // ***************************
+  // function
+  start: function start(duration, callback) {
+    // d.push('is_reset', false);
+    _control_flgsJs2['default'].clear_reset();
+    _start(duration, callback);
+  }
+
+};
+module.exports = exports['default'];
+// suspend: () => {
+//   d.push('is_suspend', true);
+// },
+//
+// resume: () => {
+//   d.push('is_suspend', false);
+// },
+//
+// reset: () => {
+//   d.push('is_reset', true);
+// },
+
+},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"baconjs":1,"lodash":3,"moment":4}],169:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _baconjs = require('baconjs');
+
+var _baconjs2 = _interopRequireDefault(_baconjs);
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _statesControl_flgsJs = require('./states/control_flgs.js');
+
+var _statesControl_flgsJs2 = _interopRequireDefault(_statesControl_flgsJs);
+
 var _statesTimerJs = require('./states/timer.js');
 
 var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
+
+var _statesSequenceJs = require('./states/sequence.js');
+
+var _statesSequenceJs2 = _interopRequireDefault(_statesSequenceJs);
 
 // ********************
 // Logic
@@ -42532,7 +42846,9 @@ var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
 // Property(combine)
 // Appコンポーネント用のstateプロパティ
 var state = _baconjs2['default'].combineTemplate({
-  timer: _statesTimerJs2['default'].data
+  timer: _statesTimerJs2['default'].data,
+  sequence: _statesSequenceJs2['default'].init([]),
+  control_flgs: _statesControl_flgsJs2['default'].data
 }).doAction(function (state) {
   console.log(state);
 });
@@ -42548,7 +42864,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./states/timer.js":166,"baconjs":1,"lodash":3}]},{},[165])
+},{"./states/control_flgs.js":166,"./states/sequence.js":167,"./states/timer.js":168,"baconjs":1,"lodash":3}]},{},[165])
 
 
 //# sourceMappingURL=main.js.map
