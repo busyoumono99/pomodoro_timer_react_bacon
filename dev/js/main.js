@@ -42782,7 +42782,7 @@ var _start = function _start(duration, callback) {
   combine.onEnd(function (val) {
     console.log(val);
     // 終了するので初期化処理
-    d.push('time', 0);
+    d.push('time', _libConstJs2['default'].POMODORO_DURATION);
     callback();
   });
 };

@@ -71,7 +71,7 @@ let _start = (duration, callback) => {
     combine.onEnd((val) => {
       console.log(val);
       // 終了するので初期化処理
-      d.push('time', 0);
+      d.push('time', Const.POMODORO_DURATION);
       callback();
     });
 }
