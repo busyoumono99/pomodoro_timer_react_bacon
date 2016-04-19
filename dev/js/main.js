@@ -42728,6 +42728,10 @@ var d = new _libDispatcherJs2['default']();
  */
 var time = d.stream('time').toProperty(_libConstJs2['default'].POMODORO_DURATION);
 
+/**
+ * 進捗(%)。キックされた後に減っていく。
+ * @var  {flot}
+ */
 var progress = d.stream('progress').toProperty(100).map(function (pro) {
   return pro < 0 ? 0 : pro;
 });

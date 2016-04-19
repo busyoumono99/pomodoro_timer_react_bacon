@@ -18,6 +18,10 @@ const d = new Dispatcher();
 let time = d.stream('time')
   .toProperty(Const.POMODORO_DURATION);
 
+/**
+ * 進捗(%)。キックされた後に減っていく。
+ * @var  {flot}
+ */
 let progress = d.stream('progress')
   .toProperty(100)
   .map((pro)=> (pro < 0) ? 0 : pro);
