@@ -42731,7 +42731,6 @@ var data = _baconjs2['default'].combineTemplate({
 // Logic
 /**
  * カウントダウンの開始。
- * TODO:キューを作ってポモドーロ、休憩、ポモドーロ、休憩、ポモドーロ、休憩、を繰り返すようにする
  * @return {void}
  */
 var _start = function _start(duration, callback) {
@@ -42771,9 +42770,6 @@ var _start = function _start(duration, callback) {
     console.log(val);
     // 終了するので初期化処理
     d.push('time', 0);
-    // d.push('is_suspend', false);
-    // d.push('is_reset', false);
-    // ControlFlgs.init();
     callback();
   });
 };
