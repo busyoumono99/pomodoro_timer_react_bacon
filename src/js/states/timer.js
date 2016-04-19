@@ -54,12 +54,6 @@ let _start = (duration, callback) => {
       interval: poll,
       flgs:     ControlFlgs.data,
     })
-    .doAction((val)=>{
-      // console.log(ControlFlgs);
-      // console.log(ControlFlgs.data);
-      // console.log(ControlFlgs.data.is_suspend);
-      console.log(val)
-    })
     .takeWhile((val)=>!val.flgs.is_reset)
     .filter((val)=>!val.flgs.is_suspend)
     // .doAction((val)=>console.log(val))
@@ -70,8 +64,7 @@ let _start = (duration, callback) => {
 
     // ストリームの端点の設定
     combine.onValue();
-    combine.onEnd((val) => {
-      console.log(val);
+    combine.onEnd(() => {
       // 終了するので初期化処理
       d.push('time', Const.POMODORO_DURATION);
       d.push('progress', 100);

@@ -42766,11 +42766,6 @@ var _start = function _start(duration, callback) {
   var combine = _baconjs2['default'].combineTemplate({
     interval: poll,
     flgs: _control_flgsJs2['default'].data
-  }).doAction(function (val) {
-    // console.log(ControlFlgs);
-    // console.log(ControlFlgs.data);
-    // console.log(ControlFlgs.data.is_suspend);
-    console.log(val);
   }).takeWhile(function (val) {
     return !val.flgs.is_reset;
   }).filter(function (val) {
@@ -42789,8 +42784,7 @@ var _start = function _start(duration, callback) {
 
   // ストリームの端点の設定
   combine.onValue();
-  combine.onEnd(function (val) {
-    console.log(val);
+  combine.onEnd(function () {
     // 終了するので初期化処理
     d.push('time', _libConstJs2['default'].POMODORO_DURATION);
     d.push('progress', 100);
