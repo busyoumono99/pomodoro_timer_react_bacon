@@ -18,14 +18,14 @@ export default class App extends React.Component{
   onClickResetBtn() {
     ControlFlgs.reset();
   }
-  onClickCreateSeqBtn() {
-    Sequence.createSequence();
+  onClickCreateSeqAllBtn() {
+    Sequence.createSequenceAll();
+  }
+  onClickCreateSeqOnceBtn() {
+    Sequence.createSequenceOnce();
   }
   onClickStartSeqBtn() {
     Sequence.start();
-  }
-  onClickNextSeqBtn() {
-    Sequence.next();
   }
 
   render() {
@@ -58,18 +58,18 @@ export default class App extends React.Component{
         <div>
           <input
             type="button"
-            value="create_sequence"
-            onClick={this.onClickCreateSeqBtn.bind(this)}
+            value="create_sequence_all"
+            onClick={this.onClickCreateSeqAllBtn.bind(this)}
+            />
+          <input
+            type="button"
+            value="create_sequence_once"
+            onClick={this.onClickCreateSeqOnceBtn.bind(this)}
             />
           <input
             type="button"
             value="start_sequence"
             onClick={this.onClickStartSeqBtn.bind(this)}
-            />
-          <input
-            type="button"
-            value="next_sequence"
-            onClick={this.onClickNextSeqBtn.bind(this)}
             />
         </div>
       </div>

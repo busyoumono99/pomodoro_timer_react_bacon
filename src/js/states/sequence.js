@@ -98,24 +98,33 @@ Bacon.combineTemplate({
 // Logic
 /**
  * キューのシーケンスを作る。ポモドーロ、休憩、ポモドーロ、休憩...を繰り返すようにする
+ * @param  {int} duration    ポモドーロ時間の間隔
+ * @param  {int} short_break 休憩時間:短い
+ * @param  {int} long_break  休憩時間:長い
+ * @param  {int} break_after 何回繰り返した後か
  * @return {void}
  */
-let createSequence = () => {
-  let pomodoros = _.fill(Array(Const.LONG_BREAK_AFTER), Const.POMODORO_DURATION);
-  let breaks = _.fill(Array(Const.LONG_BREAK_AFTER - 1), Const.SHORT_BREAK)
-  breaks.push(Const.LONG_BREAK);
+let createSequence = (duration, short_break, long_break, break_after) => {
+  // ポモドーロと休憩の配列をそれぞれ作る
+  let pomodoros = _.fill(Array(break_after), duration);
+  let breaks = [];
+  if (break_after !== 1) {
+    breaks = _.fill(Array(break_after - 1), short_break)
+    breaks.push(long_break);
+  } else {
+    // 1回の時は短い休憩のみにする
+    breaks = _.fill(Array(break_after), short_break)
+  }
 
+  //  交互に配置する
   let merged =_.reduce(pomodoros, (result, value, key)=>{
     result.push(value);
     result.push(breaks[key]);
     return result;
   }, []);
   // console.log(merged);
+  // 設定
   d.push('replace',merged);
-}
-
-let start = () => {
-  d.push('next_index', 1);
 }
 
 
@@ -128,12 +137,16 @@ export default {
 
   // ***************************
   // function
-  createSequence,
-  // next: ()=>{
-  //   d.push('next', null);
-  // },
+  createSequenceAll: ()=>{
+    createSequence(Const.POMODORO_DURATION, Const.SHORT_BREAK, Const.LONG_BREAK, Const.LONG_BREAK_AFTER);
+  },
+
+  createSequenceOnce: ()=>{
+    createSequence(Const.POMODORO_DURATION, Const.SHORT_BREAK, Const.LONG_BREAK, 1);
+  },
+
   // シーケンスの開始
   start: () => {
     d.push('next_index', 1);
-  }
+  },
 };

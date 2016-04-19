@@ -42228,19 +42228,19 @@ var App = (function (_React$Component) {
       _statesControl_flgsJs2['default'].reset();
     }
   }, {
-    key: 'onClickCreateSeqBtn',
-    value: function onClickCreateSeqBtn() {
-      _statesSequenceJs2['default'].createSequence();
+    key: 'onClickCreateSeqAllBtn',
+    value: function onClickCreateSeqAllBtn() {
+      _statesSequenceJs2['default'].createSequenceAll();
+    }
+  }, {
+    key: 'onClickCreateSeqOnceBtn',
+    value: function onClickCreateSeqOnceBtn() {
+      _statesSequenceJs2['default'].createSequenceOnce();
     }
   }, {
     key: 'onClickStartSeqBtn',
     value: function onClickStartSeqBtn() {
       _statesSequenceJs2['default'].start();
-    }
-  }, {
-    key: 'onClickNextSeqBtn',
-    value: function onClickNextSeqBtn() {
-      _statesSequenceJs2['default'].next();
     }
   }, {
     key: 'render',
@@ -42287,18 +42287,18 @@ var App = (function (_React$Component) {
           null,
           _react2['default'].createElement('input', {
             type: 'button',
-            value: 'create_sequence',
-            onClick: this.onClickCreateSeqBtn.bind(this)
+            value: 'create_sequence_all',
+            onClick: this.onClickCreateSeqAllBtn.bind(this)
+          }),
+          _react2['default'].createElement('input', {
+            type: 'button',
+            value: 'create_sequence_once',
+            onClick: this.onClickCreateSeqOnceBtn.bind(this)
           }),
           _react2['default'].createElement('input', {
             type: 'button',
             value: 'start_sequence',
             onClick: this.onClickStartSeqBtn.bind(this)
-          }),
-          _react2['default'].createElement('input', {
-            type: 'button',
-            value: 'next_sequence',
-            onClick: this.onClickNextSeqBtn.bind(this)
           })
         )
       );
@@ -42626,24 +42626,33 @@ _baconjs2['default'].combineTemplate({
 // Logic
 /**
  * キューのシーケンスを作る。ポモドーロ、休憩、ポモドーロ、休憩...を繰り返すようにする
+ * @param  {int} duration    ポモドーロ時間の間隔
+ * @param  {int} short_break 休憩時間:短い
+ * @param  {int} long_break  休憩時間:長い
+ * @param  {int} break_after 何回繰り返した後か
  * @return {void}
  */
-var createSequence = function createSequence() {
-  var pomodoros = _lodash2['default'].fill(Array(_libConstJs2['default'].LONG_BREAK_AFTER), _libConstJs2['default'].POMODORO_DURATION);
-  var breaks = _lodash2['default'].fill(Array(_libConstJs2['default'].LONG_BREAK_AFTER - 1), _libConstJs2['default'].SHORT_BREAK);
-  breaks.push(_libConstJs2['default'].LONG_BREAK);
+var createSequence = function createSequence(duration, short_break, long_break, break_after) {
+  // ポモドーロと休憩の配列をそれぞれ作る
+  var pomodoros = _lodash2['default'].fill(Array(break_after), duration);
+  var breaks = [];
+  if (break_after !== 1) {
+    breaks = _lodash2['default'].fill(Array(break_after - 1), short_break);
+    breaks.push(long_break);
+  } else {
+    // 1回の時は短い休憩のみにする
+    breaks = _lodash2['default'].fill(Array(break_after), short_break);
+  }
 
+  //  交互に配置する
   var merged = _lodash2['default'].reduce(pomodoros, function (result, value, key) {
     result.push(value);
     result.push(breaks[key]);
     return result;
   }, []);
   // console.log(merged);
+  // 設定
   d.push('replace', merged);
-};
-
-var start = function start() {
-  d.push('next_index', 1);
 };
 
 // ********************
@@ -42655,10 +42664,14 @@ exports['default'] = {
 
   // ***************************
   // function
-  createSequence: createSequence,
-  // next: ()=>{
-  //   d.push('next', null);
-  // },
+  createSequenceAll: function createSequenceAll() {
+    createSequence(_libConstJs2['default'].POMODORO_DURATION, _libConstJs2['default'].SHORT_BREAK, _libConstJs2['default'].LONG_BREAK, _libConstJs2['default'].LONG_BREAK_AFTER);
+  },
+
+  createSequenceOnce: function createSequenceOnce() {
+    createSequence(_libConstJs2['default'].POMODORO_DURATION, _libConstJs2['default'].SHORT_BREAK, _libConstJs2['default'].LONG_BREAK, 1);
+  },
+
   // シーケンスの開始
   start: function start() {
     d.push('next_index', 1);
