@@ -42261,6 +42261,12 @@ var App = (function (_React$Component) {
         _react2['default'].createElement(
           'div',
           null,
+          this.props.timer.progress,
+          '%'
+        ),
+        _react2['default'].createElement(
+          'div',
+          null,
           _react2['default'].createElement('input', {
             type: 'button',
             value: 'start',
@@ -42722,23 +42728,25 @@ var d = new _libDispatcherJs2['default']();
  */
 var time = d.stream('time').toProperty(_libConstJs2['default'].POMODORO_DURATION);
 
+var progress = d.stream('progress').toProperty(100).map(function (pro) {
+  return pro < 0 ? 0 : pro;
+});
+
 // ***************************
 // Property(combine)
 var format_time = _baconjs2['default'].combineAsArray(time).map(function (val) {
   return val[0];
 }).map(function (val) {
-  if (_lodash2['default'].isUndefined(val)) {
-    return 0;
-  }
-  return val;
+  return val < 0 ? 0 : val;
 }).map(function (val) {
   return (0, _moment2['default'])(val).format("mm:ss");
 });
 
 var data = _baconjs2['default'].combineTemplate({
   format_time: format_time,
-  time: time
-});
+  time: time,
+  progress: progress
+}).debounce(100);
 
 // ********************
 // Logic
@@ -42772,6 +42780,8 @@ var _start = function _start(duration, callback) {
   .scan(duration, function (prev, val) {
     return prev - val.interval;
   }).doAction(function (time) {
+    return d.push('progress', time / duration * 100);
+  }).doAction(function (time) {
     return d.push('time', time);
   }).takeWhile(function (time) {
     return time >= 0;
@@ -42783,6 +42793,7 @@ var _start = function _start(duration, callback) {
     console.log(val);
     // 終了するので初期化処理
     d.push('time', _libConstJs2['default'].POMODORO_DURATION);
+    d.push('progress', 100);
     callback();
   });
 };

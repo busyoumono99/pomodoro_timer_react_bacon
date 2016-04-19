@@ -18,23 +18,24 @@ const d = new Dispatcher();
 let time = d.stream('time')
   .toProperty(Const.POMODORO_DURATION);
 
+let progress = d.stream('progress')
+  .toProperty(100)
+  .map((pro)=> (pro < 0) ? 0 : pro);
+
 // ***************************
 // Property(combine)
 let format_time = Bacon.combineAsArray(time)
   .map((val)=>val[0])
-  .map((val)=>{
-    if (_.isUndefined(val)) {
-      return 0;
-    }
-    return val;
-  })
+  .map((val)=> (val < 0) ? 0 : val )
   .map((val) => moment(val).format("mm:ss"));
 
 
 let data = Bacon.combineTemplate({
     format_time,
     time,
+    progress,
   })
+  .debounce(100);
 
 // ********************
 // Logic
@@ -63,6 +64,7 @@ let _start = (duration, callback) => {
     .filter((val)=>!val.flgs.is_suspend)
     // .doAction((val)=>console.log(val))
     .scan(duration, (prev, val) => prev - val.interval)
+    .doAction((time) => d.push('progress', (time / duration) * 100) )
     .doAction((time) => d.push('time', time) )
     .takeWhile((time)=> time >= 0);
 
@@ -72,6 +74,7 @@ let _start = (duration, callback) => {
       console.log(val);
       // 終了するので初期化処理
       d.push('time', Const.POMODORO_DURATION);
+      d.push('progress', 100);
       callback();
     });
 }

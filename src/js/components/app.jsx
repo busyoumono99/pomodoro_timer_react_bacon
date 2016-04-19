@@ -33,6 +33,7 @@ export default class App extends React.Component{
       <div>
         <h1>Pomodoro Timer</h1>
         <div>{this.props.timer.format_time}</div>
+        <div>{this.props.timer.progress}%</div>
         <div>
           <input
             type="button"
