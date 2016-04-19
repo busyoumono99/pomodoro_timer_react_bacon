@@ -42762,7 +42762,7 @@ var _start = function _start(duration, callback) {
   }).doAction(function (time) {
     return d.push('time', time);
   }).takeWhile(function (time) {
-    return time > 0;
+    return time >= 0;
   });
 
   // ストリームの端点の設定

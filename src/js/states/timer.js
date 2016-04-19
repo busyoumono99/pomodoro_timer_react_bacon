@@ -65,7 +65,7 @@ let _start = (duration, callback) => {
     // .doAction((val)=>console.log(val))
     .scan(duration, (prev, val) => prev - val.interval)
     .doAction((time) => d.push('time', time) )
-    .takeWhile((time)=> time > 0);
+    .takeWhile((time)=> time >= 0);
 
     // ストリームの端点の設定
     combine.onValue();
