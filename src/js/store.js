@@ -4,6 +4,7 @@ import _      from 'lodash';
 import ControlFlgs  from './states/control_flgs.js';
 import Timer        from './states/timer.js';
 import Sequence     from './states/sequence.js';
+import Settings     from './states/settings.js';
 
 
 // ********************
@@ -21,6 +22,7 @@ var state = Bacon.combineTemplate({
   timer: Timer.data,
   sequence: Sequence.init([]),
   control_flgs:ControlFlgs.data,
+  settings: Settings.data,
 })
   .doAction((state) => {
     console.log(state);

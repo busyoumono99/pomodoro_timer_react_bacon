@@ -1,8 +1,10 @@
-import React from 'react';
+import React        from 'react';
+import _            from 'lodash';
 
 import ControlFlgs  from '../states/control_flgs.js';
 import Timer        from '../states/timer.js';
 import Sequence     from '../states/sequence.js';
+import Settings     from '../states/settings.js';
 
 export default class App extends React.Component{
 
@@ -27,8 +29,16 @@ export default class App extends React.Component{
   onClickStartSeqBtn() {
     Sequence.start();
   }
+  onChangePomodoroDuration(ev) {
+    console.log(ev.currentTarget.value);
+    Settings.updatePomodoroDuration(ev.currentTarget.value);
+  }
 
   render() {
+    const options = _.map(_.range(5, 61, 5), (val, key) => {
+      return <option key={key} value={val*60*1000}>{val}:00</option>;
+    });
+
     return (
       <div>
         <h1>Pomodoro Timer</h1>
@@ -73,8 +83,14 @@ export default class App extends React.Component{
             onClick={this.onClickStartSeqBtn.bind(this)}
             />
         </div>
+        <div>
+          <select
+            value={this.props.settings.pomodoro_duration}
+            onChange={this.onChangePomodoroDuration.bind(this)}>
+            {options}
+          </select>
+        </div>
       </div>
-
     );
   }
 

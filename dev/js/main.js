@@ -42186,6 +42186,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _statesControl_flgsJs = require('../states/control_flgs.js');
 
 var _statesControl_flgsJs2 = _interopRequireDefault(_statesControl_flgsJs);
@@ -42197,6 +42201,10 @@ var _statesTimerJs2 = _interopRequireDefault(_statesTimerJs);
 var _statesSequenceJs = require('../states/sequence.js');
 
 var _statesSequenceJs2 = _interopRequireDefault(_statesSequenceJs);
+
+var _statesSettingsJs = require('../states/settings.js');
+
+var _statesSettingsJs2 = _interopRequireDefault(_statesSettingsJs);
 
 var App = (function (_React$Component) {
   _inherits(App, _React$Component);
@@ -42243,8 +42251,23 @@ var App = (function (_React$Component) {
       _statesSequenceJs2['default'].start();
     }
   }, {
+    key: 'onChangePomodoroDuration',
+    value: function onChangePomodoroDuration(ev) {
+      console.log(ev.currentTarget.value);
+      _statesSettingsJs2['default'].updatePomodoroDuration(ev.currentTarget.value);
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var options = _lodash2['default'].map(_lodash2['default'].range(5, 61, 5), function (val, key) {
+        return _react2['default'].createElement(
+          'option',
+          { key: key, value: val * 60 * 1000 },
+          val,
+          ':00'
+        );
+      });
+
       return _react2['default'].createElement(
         'div',
         null,
@@ -42306,6 +42329,17 @@ var App = (function (_React$Component) {
             value: 'start_sequence',
             onClick: this.onClickStartSeqBtn.bind(this)
           })
+        ),
+        _react2['default'].createElement(
+          'div',
+          null,
+          _react2['default'].createElement(
+            'select',
+            {
+              value: this.props.settings.pomodoro_duration,
+              onChange: this.onChangePomodoroDuration.bind(this) },
+            options
+          )
         )
       );
     }
@@ -42318,7 +42352,7 @@ exports['default'] = App;
 ;
 module.exports = exports['default'];
 
-},{"../states/control_flgs.js":166,"../states/sequence.js":167,"../states/timer.js":168,"react":161}],163:[function(require,module,exports){
+},{"../states/control_flgs.js":166,"../states/sequence.js":167,"../states/settings.js":168,"../states/timer.js":169,"lodash":3,"react":161}],163:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -42327,8 +42361,8 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = {
   // ***************************
   //  ポモドーロ時間(ms)
-  // POMODORO_DURATION: 25 * 60 * 1000,
-  POMODORO_DURATION: 0.1 * 60 * 1000,
+  POMODORO_DURATION: 25 * 60 * 1000,
+  // POMODORO_DURATION: 0.1 * 60 * 1000,
 
   // SHORT_BREAK: 5 * 60 * 1000,
   SHORT_BREAK: 2 * 1000,
@@ -42421,7 +42455,7 @@ _storeJs2['default'].state.onValue(function (state) {
   _reactDom2['default'].render(_react2['default'].createElement(_componentsAppJsx2['default'], state), document.getElementById('app'));
 });
 
-},{"./components/app.jsx":162,"./store.js":169,"react":161,"react-dom":5}],166:[function(require,module,exports){
+},{"./components/app.jsx":162,"./store.js":170,"react":161,"react-dom":5}],166:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -42685,7 +42719,69 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"./timer.js":168,"baconjs":1,"lodash":3,"moment":4}],168:[function(require,module,exports){
+},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"./timer.js":169,"baconjs":1,"lodash":3,"moment":4}],168:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _baconjs = require('baconjs');
+
+var _baconjs2 = _interopRequireDefault(_baconjs);
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+// import moment       from 'moment';
+
+var _libDispatcherJs = require('../lib/dispatcher.js');
+
+var _libDispatcherJs2 = _interopRequireDefault(_libDispatcherJs);
+
+var _libConstJs = require('../lib/const.js');
+
+var _libConstJs2 = _interopRequireDefault(_libConstJs);
+
+// import ControlFlgs  from './control_flgs.js';
+// import Timer        from './timer.js';
+
+var d = new _libDispatcherJs2['default']();
+
+// ********************
+// Property
+
+var pomodoro_duration = d.stream('pomodoro_duration').toProperty(_libConstJs2['default'].POMODORO_DURATION);
+// .toProperty
+
+// ***************************
+// Property(combine)
+var data = _baconjs2['default'].combineTemplate({
+  pomodoro_duration: pomodoro_duration
+}).debounce(100);
+
+// ********************
+// Logic
+
+// ********************
+// public
+exports['default'] = {
+  // ***************************
+  // Property
+  data: data,
+
+  // ***************************
+  // function
+  updatePomodoroDuration: function updatePomodoroDuration(val) {
+    d.push('pomodoro_duration', val);
+  }
+};
+module.exports = exports['default'];
+
+},{"../lib/const.js":163,"../lib/dispatcher.js":164,"baconjs":1,"lodash":3}],169:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -42811,7 +42907,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"baconjs":1,"lodash":3,"moment":4}],169:[function(require,module,exports){
+},{"../lib/const.js":163,"../lib/dispatcher.js":164,"./control_flgs.js":166,"baconjs":1,"lodash":3,"moment":4}],170:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -42840,6 +42936,10 @@ var _statesSequenceJs = require('./states/sequence.js');
 
 var _statesSequenceJs2 = _interopRequireDefault(_statesSequenceJs);
 
+var _statesSettingsJs = require('./states/settings.js');
+
+var _statesSettingsJs2 = _interopRequireDefault(_statesSettingsJs);
+
 // ********************
 // Logic
 
@@ -42852,7 +42952,8 @@ var _statesSequenceJs2 = _interopRequireDefault(_statesSequenceJs);
 var state = _baconjs2['default'].combineTemplate({
   timer: _statesTimerJs2['default'].data,
   sequence: _statesSequenceJs2['default'].init([]),
-  control_flgs: _statesControl_flgsJs2['default'].data
+  control_flgs: _statesControl_flgsJs2['default'].data,
+  settings: _statesSettingsJs2['default'].data
 }).doAction(function (state) {
   console.log(state);
 });
@@ -42868,7 +42969,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"./states/control_flgs.js":166,"./states/sequence.js":167,"./states/timer.js":168,"baconjs":1,"lodash":3}]},{},[165])
+},{"./states/control_flgs.js":166,"./states/sequence.js":167,"./states/settings.js":168,"./states/timer.js":169,"baconjs":1,"lodash":3}]},{},[165])
 
 
 //# sourceMappingURL=main.js.map
