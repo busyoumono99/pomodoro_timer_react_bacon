@@ -1,5 +1,9 @@
 # *********
 # gig-node
+dev
+
+# *********
+# gig-node
 # Logs
 logs
 *.log
