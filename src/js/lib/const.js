@@ -9,15 +9,13 @@ export default {
 
   LONG_BREAK: 15 * 60 * 1000,
 
-
-  // LONG_BREAK_AFTER:4,
-  LONG_BREAK_AFTER:2,
+  LONG_BREAK_AFTER:4,
 
   OPTIONS_RANGE:{
     POMODORO_DURATION:  _.range(5, 61, 5),
     SHORT_BREAK:        _.range(1, 11, 1),
     LONG_BREAK:         _.range(5, 31, 1),
     LONG_BREAK_AFTER:   _.range(1, 11, 1),
-  }
+  },
 
 };
