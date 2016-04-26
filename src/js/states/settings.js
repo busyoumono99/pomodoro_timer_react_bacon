@@ -53,5 +53,14 @@ export default {
   // function
   updatePomodoroDuration: (val) =>{
     d.push('pomodoro_duration', val);
-  }
+  },
+  updateShortBreak: (val) =>{
+    d.push('short_break', val);
+  },
+  updateLongBreak: (val) =>{
+    d.push('long_break', val);
+  },
+  updateLongBreakAfter: (val) =>{
+    d.push('long_break_after', val);
+  },
 };
