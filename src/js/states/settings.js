@@ -13,16 +13,20 @@ const d = new Dispatcher();
 // ********************
 // Property
 let pomodoro_duration = d.stream('pomodoro_duration')
-  .toProperty(Const.POMODORO_DURATION);
+  .toProperty(Const.POMODORO_DURATION)
+  .map((val) => parseInt(val, 10));
 
 let short_break = d.stream('short_break')
-  .toProperty(Const.SHORT_BREAK);
+  .toProperty(Const.SHORT_BREAK)
+  .map((val) => parseInt(val, 10));
 
 let long_break = d.stream('long_break')
-  .toProperty(Const.LONG_BREAK);
+  .toProperty(Const.LONG_BREAK)
+  .map((val) => parseInt(val, 10));
 
 let long_break_after = d.stream('long_break_after')
-  .toProperty(Const.LONG_BREAK_AFTER);
+  .toProperty(Const.LONG_BREAK_AFTER)
+  .map((val) => parseInt(val, 10));
 
 
 
