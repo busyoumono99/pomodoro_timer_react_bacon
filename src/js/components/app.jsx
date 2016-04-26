@@ -1,6 +1,7 @@
 import React        from 'react';
 import _            from 'lodash';
 
+import Const        from '../lib/const.js';
 import ControlFlgs  from '../states/control_flgs.js';
 import Timer        from '../states/timer.js';
 import Sequence     from '../states/sequence.js';
@@ -33,10 +34,28 @@ export default class App extends React.Component{
     console.log(ev.currentTarget.value);
     Settings.updatePomodoroDuration(ev.currentTarget.value);
   }
+  onChangeShortBreak(ev) {
+    Settings.updateShortBreak(ev.currentTarget.value);
+  }
+  onChangeLongBreak(ev) {
+    Settings.updateLongBreak(ev.currentTarget.value);
+  }
+  onChangeLongBreakAfter(ev) {
+    Settings.updateLongBreakAfter(ev.currentTarget.value);
+  }
 
   render() {
-    const options = _.map(_.range(5, 61, 5), (val, key) => {
+    const pd_options = _.map(Const.OPTIONS_RANGE.POMODORO_DURATION, (val, key) => {
       return <option key={key} value={val*60*1000}>{val}:00</option>;
+    });
+    const sb_options = _.map(Const.OPTIONS_RANGE.SHORT_BREAK, (val, key) => {
+      return <option key={key} value={val*60*1000}>{val}:00</option>;
+    });
+    const lb_options = _.map(Const.OPTIONS_RANGE.LONG_BREAK, (val, key) => {
+      return <option key={key} value={val*60*1000}>{val}:00</option>;
+    });
+    const lba_options = _.map(Const.OPTIONS_RANGE.LONG_BREAK_AFTER, (val, key) => {
+      return <option key={key} value={val}>{val}</option>;
     });
 
     return (
@@ -90,7 +109,22 @@ export default class App extends React.Component{
           <select
             value={this.props.settings.pomodoro_duration}
             onChange={this.onChangePomodoroDuration.bind(this)}>
-            {options}
+            {pd_options}
+          </select>
+          <select
+            value={this.props.settings.short_break}
+            onChange={this.onChangeShortBreak.bind(this)}>
+            {sb_options}
+          </select>
+          <select
+            value={this.props.settings.long_break}
+            onChange={this.onChangeLongBreak.bind(this)}>
+            {lb_options}
+          </select>
+          <select
+            value={this.props.settings.long_break_after}
+            onChange={this.onChangeLongBreakAfter.bind(this)}>
+            {lba_options}
           </select>
         </div>
       </div>
