@@ -22,10 +22,10 @@ export default class App extends React.Component{
     ControlFlgs.reset();
   }
   onClickCreateSeqAllBtn() {
-    Sequence.createSequenceAll();
+    Sequence.createSequenceAll(this.props.settings);
   }
   onClickCreateSeqOnceBtn() {
-    Sequence.createSequenceOnce();
+    Sequence.createSequenceOnce(this.props.settings);
   }
   onClickStartSeqBtn() {
     Sequence.start();

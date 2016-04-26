@@ -137,12 +137,12 @@ export default {
 
   // ***************************
   // function
-  createSequenceAll: ()=>{
-    createSequence(Const.POMODORO_DURATION, Const.SHORT_BREAK, Const.LONG_BREAK, Const.LONG_BREAK_AFTER);
+  createSequenceAll: (stt)=>{
+    createSequence(stt.pomodoro_duration, stt.short_break, stt.long_break, stt.long_break_after);
   },
 
-  createSequenceOnce: ()=>{
-    createSequence(Const.POMODORO_DURATION, Const.SHORT_BREAK, Const.LONG_BREAK, 1);
+  createSequenceOnce: (stt)=>{
+    createSequence(stt.pomodoro_duration, stt.short_break, stt.long_break, 1);
   },
 
   // シーケンスの開始
