@@ -12,11 +12,19 @@ const d = new Dispatcher();
 
 // ********************
 // Property
-
-
 let pomodoro_duration = d.stream('pomodoro_duration')
   .toProperty(Const.POMODORO_DURATION);
-  // .toProperty
+
+let short_break = d.stream('short_break')
+  .toProperty(Const.SHORT_BREAK);
+
+let long_break = d.stream('long_break')
+  .toProperty(Const.LONG_BREAK);
+
+let long_break_after = d.stream('long_break_after')
+  .toProperty(Const.LONG_BREAK_AFTER);
+
+
 
 
 
@@ -24,6 +32,9 @@ let pomodoro_duration = d.stream('pomodoro_duration')
 // Property(combine)
 let data = Bacon.combineTemplate({
     pomodoro_duration,
+    short_break,
+    long_break,
+    long_break_after,
   })
   .debounce(100);
 
