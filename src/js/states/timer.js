@@ -6,6 +6,7 @@ import Dispatcher   from '../lib/dispatcher.js';
 import Const        from '../lib/const.js';
 
 import ControlFlgs  from './control_flgs.js';
+import Settings     from './settings.js';
 
 const d = new Dispatcher();
 
@@ -13,10 +14,24 @@ const d = new Dispatcher();
 // Property
 /**
  * 現在の時間(ms)。キックされた後に減っていく。
+ *  設定プロパティとも同期している
  * @var  {int}
  */
 let time = d.stream('time')
-  .toProperty(Const.POMODORO_DURATION);
+  .toProperty(0)
+  .combine(Settings.data, (time, settings)=> {
+    return {time: time, duration: settings.pomodoro_duration}
+  })
+  .slidingWindow(2)
+  // 変化している状態を判定して、している値を返す。
+  .map((arr)=>{
+    let pre = arr[0];
+    let current = arr[1];
+    if(current == null) return pre.duration;
+    if(pre.time !== current.time) return current.time;
+    if(pre.duration !== current.duration) return current.duration;
+  });
+
 
 /**
  * 進捗(%)。キックされた後に減っていく。
@@ -70,7 +85,7 @@ let _start = (duration, callback) => {
     combine.onValue();
     combine.onEnd(() => {
       // 終了するので初期化処理
-      d.push('time', Const.POMODORO_DURATION);
+      d.push('time', duration);
       d.push('progress', 100);
       callback();
     });
