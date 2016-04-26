@@ -42,8 +42,10 @@ export default class App extends React.Component{
     return (
       <div>
         <h1>Pomodoro Timer</h1>
+        <h4>Timer</h4>
         <div>{this.props.timer.format_time}</div>
         <div>{this.props.timer.progress}%</div>
+        <h4>Control</h4>
         <div>
           <input
             type="button"
@@ -83,6 +85,7 @@ export default class App extends React.Component{
             onClick={this.onClickStartSeqBtn.bind(this)}
             />
         </div>
+        <h4>Settings</h4>
         <div>
           <select
             value={this.props.settings.pomodoro_duration}
